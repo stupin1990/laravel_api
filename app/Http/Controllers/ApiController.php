@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Post;
+use App\Models\Comment;
 
 class ApiController extends Controller
 {
@@ -40,12 +41,34 @@ class ApiController extends Controller
         $token = explode('|', $token->plainTextToken)[1];
 
         return response()->json([
+            'type' => 'Bearer',
             'token' => $token
         ]);
     }
 
     public function users(Request $request)
     {
-        return $request->user();
+        $users = User::with(['posts', 'comments'])->get();
+
+        return response()->json($users);
+    }
+
+    public function posts(Request $request)
+    {
+        if ($request->isMethod('get')) {
+            $posts = Post::with(['comments'])->where('user_id', $request->user()->id)->get();
+        }
+        else {
+            $posts = Post::with(['comments'])->get();
+        }
+
+        return response()->json($posts);
+    }
+
+    public function comments(Request $request)
+    {
+        $comments = Comment::with(['user', 'post'])->get();
+
+        return response()->json($comments);
     }
 }
