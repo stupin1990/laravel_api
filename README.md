@@ -10,11 +10,13 @@
 
 ## Endpoints
 1. GET: /api/get-token?email=[users.email]&password=qwerty
+
     Responce:
     {
         "type": "Bearer",
         "token": "l2hfcnQrcxixsNdzRzPuEd2QHSxCIfZ0Y8YSOlll"
     }
+    
     This token should be use in all other requests as Authorization header
 2. GET: /api/users - Show all users
 3. GET: /api/posts - Show all posts of current user
