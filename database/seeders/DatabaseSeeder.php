@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;
+use App\Models\Call;
 
 class DatabaseSeeder extends Seeder
 {
@@ -29,9 +30,19 @@ class DatabaseSeeder extends Seeder
             Comment::factory(100)->create();
         }
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        if (!Call::count()) {
+           $calltime = time();
+           for ($i = 0; $i < 100; $i++) {
+                Call::factory()->create([
+                    'user_id' => User::select('id')
+                        ->orderByRaw('random()')
+                        ->first()
+                        ->id,
+                    'calltime' => date('Y-m-d H:i:s', $calltime),
+                    'duration_sec' => rand(30, 120)
+                ]);
+                $calltime += rand(4, 30) * 60 + rand(1, 60);
+           }
+        }
     }
 }

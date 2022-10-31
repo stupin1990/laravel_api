@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;
+use App\Models\Call;
 
 class ApiController extends Controller
 {
@@ -56,10 +57,17 @@ class ApiController extends Controller
     public function posts(Request $request)
     {
         if ($request->isMethod('get')) {
-            $posts = Post::with(['comments'])->where('user_id', $request->user()->id)->get();
+            $posts = Post::with(['comments'])
+                ->where('user_id', $request->user()->id)
+                ->get();
         }
         else {
-            $posts = Post::with(['comments'])->get();
+            $user_id = $request->input('user_id', false);
+            $posts = Post::with(['comments'])
+                ->when($user_id, function ($query) use ($user_id) {
+                    return $query->where('user_id', $user_id);
+                })
+                ->get();
         }
 
         return response()->json($posts);
@@ -67,8 +75,24 @@ class ApiController extends Controller
 
     public function comments(Request $request)
     {
-        $comments = Comment::with(['user', 'post'])->get();
+        $user_id = $request->input('user_id', false);
+        $post_id = $request->input('post_id', false);
+
+        $comments = Comment::with(['user', 'post'])
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('user_id', $user_id);
+            })
+            ->when($post_id, function ($query) use ($post_id) {
+                return $query->where('post_id', $post_id);
+            })
+            ->get();
 
         return response()->json($comments);
+    }
+
+    public function calls($break_time = 5, Request $request)
+    {
+        $calls = Call::getCallsBreaksByMonth($break_time);
+        return response()->json($calls);
     }
 }

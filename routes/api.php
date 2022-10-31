@@ -22,4 +22,5 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
      Route::get('/posts', [ApiController::class, 'posts']);
      Route::post('/posts', [ApiController::class, 'posts']);
      Route::post('/comments', [ApiController::class, 'comments']);
+     Route::get('/calls/{break_time?}', [ApiController::class, 'calls'])->where('break_time', '[0-9]+');
 });
