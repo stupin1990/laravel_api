@@ -1,6 +1,6 @@
 ## Instalation
 
-1. php composer install
+1. composer install
 2. php artisan migrate
 3. php db:seed
 4. cp .env.example .env
