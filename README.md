@@ -2,7 +2,7 @@
 
 1. composer install
 2. php artisan migrate
-3. php db:seed
+3. php artisan db:seed
 4. cp .env.example .env
 5. Edit DB_CONNECTION, DB_HOST, DB_PORTm DB_DATABASE, DB_USERNAME, DB_PASSWORD
 6. php artisan key:generate

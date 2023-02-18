@@ -12,6 +12,9 @@ use App\Models\Call;
 
 class ApiController extends Controller
 {
+    /**
+     * Get token by email / password
+     */
     public function token(Request $request)
     {
         $email = $request->input('email', false);
@@ -47,6 +50,9 @@ class ApiController extends Controller
         ]);
     }
 
+    /**
+     * Get all users
+     */
     public function users(Request $request)
     {
         $users = User::with(['posts', 'comments'])->get();
@@ -54,45 +60,49 @@ class ApiController extends Controller
         return response()->json($users);
     }
 
+    /**
+     * Get posts for current user or for all / given user
+     */
     public function posts(Request $request)
     {
-        if ($request->isMethod('get')) {
-            $posts = Post::with(['comments'])
-                ->where('user_id', $request->user()->id)
-                ->get();
-        }
-        else {
-            $user_id = $request->input('user_id', false);
-            $posts = Post::with(['comments'])
-                ->when($user_id, function ($query) use ($user_id) {
-                    return $query->where('user_id', $user_id);
-                })
-                ->get();
-        }
+        $user_id = $request->isMethod('get') ? $request->user()->id : $request->input('user_id', false);
+        $posts = Post::with(['comments'])
+            ->when($user_id, function ($query) use ($user_id) {
+                return $query->where('user_id', $user_id);
+            })
+            ->get();
 
         return response()->json($posts);
     }
 
+    /**
+     * Get all comments or comments of given user / post
+     */
     public function comments(Request $request)
     {
-        $user_id = $request->input('user_id', false);
-        $post_id = $request->input('post_id', false);
+        $params = [
+            'user_id' => $request->input('user_id', false),
+            'post_id' => $request->input('post_id', false)
+        ];
 
-        $comments = Comment::with(['user', 'post'])
-            ->when($user_id, function ($query) use ($user_id) {
-                return $query->where('user_id', $user_id);
-            })
-            ->when($post_id, function ($query) use ($post_id) {
-                return $query->where('post_id', $post_id);
-            })
-            ->get();
+        $comments = Comment::with(['user', 'post']);
+        foreach ($params as $param => $value) {
+            $comments->when($value, function ($query) use ($param, $value) {
+                return $query->where($param, $value);
+            });
+        }
+        $comments = $comments->get();
 
         return response()->json($comments);
     }
 
+    /**
+     * Display by months of the current year how many interruptions each user had more than 5 minutes between calls
+     */
     public function calls($break_time = 5, Request $request)
     {
         $calls = Call::getCallsBreaksByMonth($break_time);
+
         return response()->json($calls);
     }
 }
