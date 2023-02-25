@@ -15,12 +15,12 @@ use App\Http\Controllers\ApiController;
 |
 */
 
-Route::get('/get-token', [ApiController::class, 'token']);
+Route::get('/get-token', [ApiController::class, 'token'])->name('token');
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
-     Route::get('/users', [ApiController::class, 'users']);
-     Route::get('/posts', [ApiController::class, 'posts']);
-     Route::post('/posts', [ApiController::class, 'posts']);
-     Route::post('/comments', [ApiController::class, 'comments']);
-     Route::get('/calls/{break_time?}', [ApiController::class, 'calls'])->where('break_time', '[0-9]+');
+     Route::get('/users', [ApiController::class, 'users'])->name('users');
+     Route::get('/posts', [ApiController::class, 'posts'])->name('posts.get');
+     Route::post('/posts', [ApiController::class, 'posts'])->name('posts.post');
+     Route::post('/comments', [ApiController::class, 'comments'])->name('comments');
+     Route::get('/calls/{break_time?}', [ApiController::class, 'calls'])->where('break_time', '[0-9]+')->name('calls');
 });

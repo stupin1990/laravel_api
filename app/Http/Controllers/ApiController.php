@@ -9,22 +9,17 @@ use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;
 use App\Models\Call;
+use App\Http\Requests\ApiRequest;
 
 class ApiController extends Controller
 {
     /**
      * Get token by email / password
      */
-    public function token(Request $request)
+    public function token(ApiRequest $request)
     {
         $email = $request->input('email', false);
         $password = $request->input('password', false);
-
-        if (!$email || !$password) {
-            return response()->json([
-                'error' => 'Invalid credentials'
-            ], 401);
-        }
 
         $user = User::where('email', $email)->first();
         if (!$user) {
@@ -53,7 +48,7 @@ class ApiController extends Controller
     /**
      * Get all users
      */
-    public function users(Request $request)
+    public function users(ApiRequest $request)
     {
         $users = User::with(['posts', 'comments'])->get();
 
@@ -63,7 +58,7 @@ class ApiController extends Controller
     /**
      * Get posts for current user or for all / given user
      */
-    public function posts(Request $request)
+    public function posts(ApiRequest $request)
     {
         $user_id = $request->isMethod('get') ? $request->user()->id : $request->input('user_id', false);
         $posts = Post::with(['comments'])
@@ -78,7 +73,7 @@ class ApiController extends Controller
     /**
      * Get all comments or comments of given user / post
      */
-    public function comments(Request $request)
+    public function comments(ApiRequest $request)
     {
         $params = [
             'user_id' => $request->input('user_id', false),
@@ -99,7 +94,7 @@ class ApiController extends Controller
     /**
      * Display by months of the current year how many interruptions each user had more than 5 minutes between calls
      */
-    public function calls($break_time = 5, Request $request)
+    public function calls($break_time = 5, ApiRequest $request)
     {
         $calls = Call::getCallsBreaksByMonth($break_time);
 
