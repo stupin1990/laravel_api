@@ -13,6 +13,13 @@ use App\Http\Requests\ApiRequest;
 
 class ApiController extends Controller
 {
+    protected $per_page;
+
+    public function __construct()
+    {
+        $this->per_page = config('settings.items_per_page');
+    }
+
     /**
      * Get token by email / password
      */
@@ -50,7 +57,7 @@ class ApiController extends Controller
      */
     public function users(ApiRequest $request)
     {
-        $users = User::with(['posts', 'comments'])->get();
+        $users = User::with(['posts', 'comments'])->apiPaginate($this->per_page);;
 
         return response()->json($users);
     }
@@ -60,12 +67,12 @@ class ApiController extends Controller
      */
     public function posts(ApiRequest $request)
     {
-        $user_id = $request->isMethod('get') ? $request->user()->id : $request->input('user_id', false);
+        $user_id = $request->isMethod('get') ? $request->user()->id : $request->input('user_id', 0);
+
         $posts = Post::with(['comments'])
             ->when($user_id, function ($query) use ($user_id) {
                 return $query->where('user_id', $user_id);
-            })
-            ->get();
+            })->apiPaginate($this->per_page);
 
         return response()->json($posts);
     }
@@ -86,7 +93,7 @@ class ApiController extends Controller
                 return $query->where($param, $value);
             });
         }
-        $comments = $comments->get();
+        $comments = $comments->apiPaginate($this->per_page);
 
         return response()->json($comments);
     }
@@ -94,9 +101,9 @@ class ApiController extends Controller
     /**
      * Display by months of the current year how many interruptions each user had more than 5 minutes between calls
      */
-    public function calls($break_time = 5, ApiRequest $request)
+    public function calls(int $break_time = 5)
     {
-        $calls = Call::getCallsBreaksByMonth($break_time);
+        $calls = Call::breakes($break_time, $this->per_page);
 
         return response()->json($calls);
     }

@@ -16,8 +16,10 @@
         "type": "Bearer",
         "token": "l2hfcnQrcxixsNdzRzPuEd2QHSxCIfZ0Y8YSOlll"
     }
-    
-    This token should be use in all other requests as Authorization header
+
+    Headers for others requests:
+        Authorization: Bearer l2hfcnQrcxixsNdzRzPuEd2QHSxCIfZ0Y8YSOlll
+        Accept: application/json
 2. GET: /api/users - Show all users
 3. GET: /api/posts - Show all posts of current user
 4. POST: /api/posts - Show all posts, or posts of given user
