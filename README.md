@@ -9,7 +9,7 @@
 7. php artisan serve
 
 ## Endpoints
-1. GET: /api/get-token?email=[users.email]&password=qwerty
+1. GET: http://127.0.0.1:8000/api/get-token?email=[users.email]&password=qwerty
 
     Responce:
     {
@@ -20,10 +20,10 @@
     Headers for others requests:
         Authorization: Bearer l2hfcnQrcxixsNdzRzPuEd2QHSxCIfZ0Y8YSOlll
         Accept: application/json
-2. GET: /api/users - Show all users
-3. GET: /api/posts - Show all posts of current user
-4. POST: /api/posts - Show all posts, or posts of given user
+2. GET: http://127.0.0.1:8000/api/users - Show all users
+3. GET: http://127.0.0.1:8000/api/posts - Show all posts of current user
+4. POST: http://127.0.0.1:8000/api/posts - Show all posts, or posts of given user
     params: user_id
-5. POST: /api/comments - Show all comments, or comments of given user / post
+5. POST: http://127.0.0.1:8000/api/comments - Show all comments, or comments of given user / post
     params: user_id, post_id
-6. GET: /api/calls/{duration_sec} / Display by months of the current year how many interruptions each user had more than 5 minutes between calls
+6. GET: http://127.0.0.1:8000/api/calls/{duration_sec} / Display by months of the current year how many interruptions each user had more than 5 minutes between calls
