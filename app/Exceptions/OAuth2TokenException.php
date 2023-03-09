@@ -3,18 +3,9 @@
 namespace App\Exceptions;
  
 use Exception;
-use Illuminate\Support\MessageBag;
  
-class ApiRequestException extends Exception
+class OAuth2TokenException extends Exception
 {
-
-    protected MessageBag $messages;
-
-    public function __construct(MessageBag $messages)
-    {
-        $this->messages = $messages;
-    }
-
     /**
      * Report the exception.
      *
@@ -33,6 +24,6 @@ class ApiRequestException extends Exception
      */
     public function render($request)
     {
-        return response()->json(['error' => $this->messages->all()[0]], 400);
+        return response()->json(['error' => $this->message], 401);
     }
 }

@@ -15,7 +15,7 @@ use App\Http\Controllers\ApiController;
 |
 */
 
-Route::get('/get-token', [ApiController::class, 'token'])->name('token');
+Route::get('/get-token', [ApiController::class, 'token'])->name('token')->middleware('token');
 
 Route::middleware(['auth:sanctum'])->group(function () {
      Route::get('/users', [ApiController::class, 'users'])->name('users');

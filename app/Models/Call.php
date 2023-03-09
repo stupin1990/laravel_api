@@ -27,7 +27,7 @@ class Call extends Model
     }
 
     /**
-     * Get breakes for users array
+     * Get breakes for users from calls grouped by month of this year
      * @param array $users: [users_id]
      * @param int $break_time: time in seconds
      * @return array users_id, month, breaks
@@ -66,31 +66,20 @@ class Call extends Model
     }
 
     /**
-     * Scope for getting interruptions for each user that had more than $break_time minutes between calls by months of the current year
+     * Get paginated list of users from calls grouped by month of this year
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param int $break_time
      * @param int $per_page
      * @return array
      */
-    public function scopeBreakes(Builder $query, int $break_time = 5, int $per_page = 5) : array
+    public static function getPaginatedUsersByMonthOfThisYear(int $per_page = 5) : array
     {
-        $users = [];
         // Get with pagination grouped users and monthes for current year
-        $items = $query->selectRaw("user_id, EXTRACT(MONTH FROM calltime) AS month")
+        return static::selectRaw("user_id, EXTRACT(MONTH FROM calltime) AS month")
             ->whereRaw("EXTRACT(YEAR FROM calltime) = EXTRACT(YEAR FROM NOW())")
             ->groupByRaw("user_id, EXTRACT(MONTH FROM calltime)")
             ->orderBy('user_id')
             ->orderBy('month')
             ->apiPaginate($per_page);
-
-        $users = [];
-        collect($items['data'])->map(function ($item) use (&$users) {
-            $users[] = $item['user_id'];
-        });
-
-        $items['data'] = static::getUsersCallsBreaksByMonth($users, $break_time);
-
-        return $items;
     }
 }

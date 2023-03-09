@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\ApiRequest;
 
-use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;
-use App\Models\Call;
-use App\Http\Requests\ApiRequest;
+
+use App\Services\StatisticService;
+
 
 class ApiController extends Controller
 {
@@ -22,38 +23,20 @@ class ApiController extends Controller
 
     /**
      * Get token by email / password
+     * @param Illuminate\Http\Request $request
+     * 
+     * @return Illuminate\Http\JsonResponse
      */
-    public function token(ApiRequest $request)
+    public function token(Request $request)
     {
-        $email = $request->input('email', false);
-        $password = $request->input('password', false);
-
-        $user = User::where('email', $email)->first();
-        if (!$user) {
-            return response()->json([
-                'error' => 'User not found'
-            ], 401);
-        }
-
-        if (!Hash::check($password, $user->password)) {
-            return response()->json([
-                'error' => 'Password is invalid'
-            ], 401);
-        }
-
-        $user->tokens()->delete();  
-
-        $token = $user->createToken($email);
-        $token = explode('|', $token->plainTextToken)[1];
-
-        return response()->json([
-            'type' => 'Bearer',
-            'token' => $token
-        ]);
+        return response()->json($request->input('token'));
     }
 
     /**
      * Get all users
+     * @param App\Http\Requests\ApiRequest $request
+     * 
+     * @return Illuminate\Http\JsonResponse
      */
     public function users(ApiRequest $request)
     {
@@ -64,21 +47,23 @@ class ApiController extends Controller
 
     /**
      * Get posts for current user or for all / given user
+     * @param App\Http\Requests\ApiRequest $request
+     * 
+     * @return Illuminate\Http\JsonResponse
      */
     public function posts(ApiRequest $request)
     {
         $user_id = $request->isMethod('get') ? $request->user()->id : $request->input('user_id', 0);
-
-        $posts = Post::with(['comments'])
-            ->when($user_id, function ($query) use ($user_id) {
-                return $query->where('user_id', $user_id);
-            })->apiPaginate($this->per_page);
+        $posts = Post::getPostsForUser($user_id, ['comments'], $this->per_page);
 
         return response()->json($posts);
     }
 
     /**
      * Get all comments or comments of given user / post
+     * @param App\Http\Requests\ApiRequest $request
+     * 
+     * @return Illuminate\Http\JsonResponse
      */
     public function comments(ApiRequest $request)
     {
@@ -86,24 +71,22 @@ class ApiController extends Controller
             'user_id' => $request->input('user_id', false),
             'post_id' => $request->input('post_id', false)
         ];
-
-        $comments = Comment::with(['user', 'post']);
-        foreach ($params as $param => $value) {
-            $comments->when($value, function ($query) use ($param, $value) {
-                return $query->where($param, $value);
-            });
-        }
-        $comments = $comments->apiPaginate($this->per_page);
+        $comments = Comment::getCommentsByParams($params, ['user', 'post'], $this->per_page);
 
         return response()->json($comments);
     }
 
     /**
      * Display by months of the current year how many interruptions each user had more than 5 minutes between calls
+     * @param int $break_time
+     * @param Illuminate\Http\Request $request
+     * @param StatisticService $statistic
+     * 
+     * @return Illuminate\Http\JsonResponse
      */
-    public function calls(int $break_time = 5)
+    public function calls(int $break_time = 5, Request $request, StatisticService $statistic)
     {
-        $calls = Call::breakes($break_time, $this->per_page);
+        $calls = $statistic->getCallBreakesByMonth($break_time, $this->per_page);
 
         return response()->json($calls);
     }

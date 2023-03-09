@@ -28,12 +28,6 @@ class ApiRequest extends FormRequest
     public function rules()
     {
         switch ($this->instance()->url()) {
-            case route('token'):
-                $rules = [
-                    'email' => 'required|email|max:255',
-                    'password' => 'required|string|max:255'
-                ];
-                break;
             case route('posts.post'):
                 $rules = [
                     'user_id' => 'integer',
