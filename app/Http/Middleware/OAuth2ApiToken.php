@@ -21,29 +21,7 @@ class OAuth2ApiToken
      */
     public function handle(Request $request, Closure $next)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email|max:255',
-            'password' => 'required|string|max:255'
-        ]);
-        if ($validator->fails()) {
-            throw new ApiRequestException($validator->messages());
-        }
-
-        $email = $request->input('email', false);
-        $password = $request->input('password', false);
-
-        if (!$email || !$password) {
-            throw new OAuth2TokenException('Enter user and password!');
-        }
-
-        $user = User::where('email', $email)->first();
-        if (!$user) {
-            throw new OAuth2TokenException('User not found');
-        }
-
-        if (!Hash::check($password, $user->password)) {
-            throw new OAuth2TokenException('Password is invalid');
-        }
+        $user = $this->getValidatedUser($request->all());
 
         $user->tokens()->delete();  
 
@@ -56,5 +34,39 @@ class OAuth2ApiToken
         ]]);
 
         return $next($request);
+    }
+
+    /**
+     * Validate request data and get validated User instanse
+     * @param array $request
+     * 
+     * @return User
+     */
+    public function getValidatedUser(array $request) : User
+    {
+        $validator = Validator::make($request, [
+            'email' => 'required|email|max:255',
+            'password' => 'required|string|max:255'
+        ]);
+        if ($validator->fails()) {
+            throw new ApiRequestException($validator->messages());
+        }
+
+        extract($request);
+
+        if (!$email || !$password) {
+            throw new OAuth2TokenException('Enter user and password!');
+        }
+
+        $user = User::select(['id', 'email', 'password'])->where('email', $email)->first();
+        if (!$user) {
+            throw new OAuth2TokenException('User not found');
+        }
+
+        if (!Hash::check($password, $user->password)) {
+            throw new OAuth2TokenException('Password is invalid');
+        }
+
+        return $user;
     }
 }

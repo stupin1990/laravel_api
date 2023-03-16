@@ -30,9 +30,14 @@ class DatabaseSeeder extends Seeder
             Comment::factory(100)->create();
         }
 
-        if (!Call::count()) {
-           $calltime = time();
-           for ($i = 0; $i < 100; $i++) {
+        if (Call::count()) {
+            $comment = Call::select('calltime')
+                ->orderBy('id', 'desc')
+                ->first();
+            $calltime = $comment ? strtotime($comment->calltime) : time();
+
+            for ($i = 0; $i < 10000; $i++) {
+                $calltime += rand(4, 30) * 60 + rand(1, 60);
                 Call::factory()->create([
                     'user_id' => User::select('id')
                         ->orderByRaw('random()')
@@ -41,8 +46,7 @@ class DatabaseSeeder extends Seeder
                     'calltime' => date('Y-m-d H:i:s', $calltime),
                     'duration_sec' => rand(30, 120)
                 ]);
-                $calltime += rand(4, 30) * 60 + rand(1, 60);
-           }
+            }
         }
     }
 }

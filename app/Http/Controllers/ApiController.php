@@ -14,7 +14,7 @@ use App\Services\StatisticService;
 
 class ApiController extends Controller
 {
-    protected $per_page;
+    protected int $per_page;
 
     public function __construct()
     {
@@ -40,7 +40,10 @@ class ApiController extends Controller
      */
     public function users(ApiRequest $request)
     {
-        $users = User::with(['posts', 'comments'])->apiPaginate($this->per_page);;
+        $users = User::getDataByParams(
+            select: ['id', 'name', 'email'],
+            with: ['posts', 'comments']
+            )->apiPaginate($this->per_page);
 
         return response()->json($users);
     }
@@ -54,7 +57,11 @@ class ApiController extends Controller
     public function posts(ApiRequest $request)
     {
         $user_id = $request->isMethod('get') ? $request->user()->id : $request->input('user_id', 0);
-        $posts = Post::getPostsForUser($user_id, ['comments'], $this->per_page);
+
+        $posts = Post::getDataByParams(
+            with: ['comments'],
+            params: ['user_id' => $user_id]
+            )->apiPaginate($this->per_page);
 
         return response()->json($posts);
     }
@@ -67,11 +74,12 @@ class ApiController extends Controller
      */
     public function comments(ApiRequest $request)
     {
-        $params = [
-            'user_id' => $request->input('user_id', false),
-            'post_id' => $request->input('post_id', false)
-        ];
-        $comments = Comment::getCommentsByParams($params, ['user', 'post'], $this->per_page);
+        $comments = Comment::getDataByParams(
+            with: ['user', 'post'],
+            params: [
+                'user_id' => $request->input('user_id', false),
+                'post_id' => $request->input('post_id', false)
+            ])->apiPaginate($this->per_page);
 
         return response()->json($comments);
     }

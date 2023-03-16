@@ -17,7 +17,7 @@ use App\Http\Controllers\ApiController;
 
 Route::get('/get-token', [ApiController::class, 'token'])->name('token')->middleware('token');
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum', 'sql_log'])->group(function () {
      Route::get('/users', [ApiController::class, 'users'])->name('users');
      Route::get('/posts', [ApiController::class, 'posts'])->name('posts.get');
      Route::post('/posts', [ApiController::class, 'posts'])->name('posts.post');

@@ -6,11 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Traits\ApiPaginator;
+use App\Traits\ModelsCommon;
 
 class Comment extends Model
 {
-    use HasFactory, ApiPaginator;
+    use HasFactory, ApiPaginator, ModelsCommon;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'user_id',
         'post_id',
@@ -18,13 +24,14 @@ class Comment extends Model
     ];
 
     /**
-     * The attributes that should be cast.
+     * The attributes that should be hidden for serialization.
      *
-     * @var array<string, string>
+     * @var array<int, string>
      */
-    protected $casts = [
-        'created_at' => 'datetime:Y-m-d H:i:s',
-        'updated_at' => 'datetime:Y-m-d H:i:s'
+    protected $hidden = [
+        'id',
+        'user_id',
+        'post_id'
     ];
 
     public function user(): BelongsTo
@@ -35,24 +42,5 @@ class Comment extends Model
     public function post(): BelongsTo
     {
         return $this->belongsTo(Post::class);
-    }
-
-    /**
-     * Get paginated comments or comments of given user / post
-     * @param array $params
-     * @param array $with
-     * @param array $per_page
-     * 
-     * @return array
-     */
-    public static function getCommentsByParams(array $params = [], array $with = [], int $per_page = 5) : array
-    {
-        $results = static::with($with);
-        foreach ($params as $param => $value) {
-            $results->when($value, function ($query) use ($param, $value) {
-                return $query->where($param, $value);
-            });
-        }
-        return $results->apiPaginate($per_page);
     }
 }

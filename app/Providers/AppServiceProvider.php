@@ -16,8 +16,6 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(StatisticService::class, function ($app) {
-            //dd($app->request->all()); die;
-
             return new StatisticService;
         });
     }

@@ -17,15 +17,10 @@ class StatisticService
      */
     public function getCallBreakesByMonth(int $break_time, int $per_page): array
     {
-        $paginated_users = Call::getPaginatedUsersByMonthOfThisYear($per_page);
-        
-        $users = [];
-        collect($paginated_users['data'])->map(function ($item) use (&$users) {
-            $users[] = $item['user_id'];
-        });
+        $query = Call::getCallBreakesByMonthQuery($break_time);
 
-        $items['data'] = Call::getUsersCallsBreaksByMonth($users, $break_time);
+        $data = Call::apiPaginateRaw($query, $per_page);
 
-        return $items;
+        return $data;
     }
 }

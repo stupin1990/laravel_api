@@ -46,6 +46,10 @@ class Kernel extends HttpKernel
 
         'token' => [
             \App\Http\Middleware\OAuth2ApiToken::class
+        ],
+
+        'sql_log' => [
+            \App\Http\Middleware\SqlLog::class
         ]
     ];
 
